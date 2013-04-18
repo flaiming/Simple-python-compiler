@@ -1,8 +1,9 @@
 a:=5
+a:=a*5
 if a == 4
-print 4
+print a
 else
-print 5
+print a
 
 while a < 10
 a := a + 1
