@@ -1,51 +1,9 @@
-import sys
 import re
-
-#operators = {
-#             ':=': r'\:=',
-#             '(': r'\(',
-#             '}': r'\}',
-#             ';': r';',
-#             '+': r'\+',
-#             '-': r'-',
-#             '*': r'\*',
-#             '/': r'/',
-#             }
-#
-#conditions = {'==': r'==',
-#              '!=': r'!=',
-#              '<': r'<',
-#              '<=': r'<=',
-#              '>': r'>',
-#              '>=': r'>=',
-#              }
-#
-#keywords = {
-#            'if': r'if',
-#            'else': r'else',
-#            'endif': r'endif',
-#            'while': r'while',
-#            'endwhile': r'endwhile',
-#            'print': r'print',
-#            }
-#
-#number = {
-#           'digit': r'[0-9]+'
-#           }
-#
-#identifier = {
-#           'label': r'[A-Za-z][A-Za-z0-9_]*'
-#           }
-#
-#blanks = {
-#          '1': r'[ \n\t]+',
-#          '2': r'#[^\n]*',
-#          }
 
 class TokenTypes(object):
     RESERVED = 'RESERVED'
-    INT      = 'INT'
-    ID       = 'ID'
+    DIGIT      = 'DIGIT'
+    LABEL       = 'LABEL'
 
 token_exprs = [
     (r'[ \n\t]+',              None),
@@ -62,7 +20,7 @@ token_exprs = [
     (r'<=',                    TokenTypes.RESERVED),
     (r'>',                     TokenTypes.RESERVED),
     (r'>=',                    TokenTypes.RESERVED),
-    (r'==',                     TokenTypes.RESERVED),
+    (r'==',                    TokenTypes.RESERVED),
     (r'!=',                    TokenTypes.RESERVED),
     (r'and',                   TokenTypes.RESERVED),
     (r'or',                    TokenTypes.RESERVED),
@@ -72,13 +30,15 @@ token_exprs = [
     (r'else',                  TokenTypes.RESERVED),
     (r'endif',                 TokenTypes.RESERVED),
     (r'while',                 TokenTypes.RESERVED),
-    (r'endwhile',                 TokenTypes.RESERVED),
+    (r'endwhile',              TokenTypes.RESERVED),
     (r'print',                 TokenTypes.RESERVED),
-    (r'[0-9]+',                TokenTypes.INT),
-    (r'[A-Za-z][A-Za-z0-9_]*', TokenTypes.ID),
+    (r'[0-9]+',                TokenTypes.DIGIT),
+    (r'[A-Za-z][A-Za-z0-9_]*', TokenTypes.LABEL),
 ]
 
+
 def lex(characters, token_exprs):
+    """Devides input text to tokens, defined by token_exprs."""
     pos = 0
     tokens = []
     while pos < len(characters):
@@ -94,25 +54,12 @@ def lex(characters, token_exprs):
                     tokens.append(token)
                 break
         if not match:
-            sys.stderr.write('Illegal character: %s\n' % characters[pos])
-            sys.exit(1)
+            print 'Illegal character: %s' % characters[pos]
+            exit(1)
         else:
+            #set current position just after matched token
             pos = match.end(0)
     return tokens
 
-#def transform():
-#    exprs = operators.values() + conditions.values() + keywords.values()
-#    reserved = []
-#    for e in exprs:
-#        reserved.append((e, TokenTypes.RESERVED))
-#    
-#    none = []
-#    for b in blanks.values():
-#        none.append((b, None))
-#        
-#    return none + reserved + [(number.values()[0], TokenTypes.INT)] + [(identifier.values()[0], TokenTypes.ID)]
-
-def do_lex(characters):
-#    exprs = transform()
-#    print exprs
+def doLex(characters):
     return lex(characters, token_exprs)

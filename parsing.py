@@ -1,32 +1,34 @@
-from lexer import TokenTypes, do_lex
+from lexer import TokenTypes
 
 class Parser():
+    """Parse tokens and produce syntactic tree.
+    
+    Input: list of tokens
+    Output: syntactic tree
+    
+    """
     
     def __init__(self):
         self.tokenlist = []
         self.currtoken = ("", "", 0)
         self.symboltable = dict()
     
-    def parseFile(self, filename):
-        inputfile = open(filename, "r")
-        inputstring = inputfile.read()
-        self.tokenlist = do_lex(inputstring)
-        print self.tokenlist
-        self.nextToken()
-        return self.doStatementList()
+    def parseTokens(self, tokenList):
+        self.tokenlist = tokenList
+        self._nextToken()
+        return self._doStatementList()
     
     def getSymbolTable(self):
         return self.symboltable
     
-    def nextToken(self):
+    def _nextToken(self):
         if(len(self.tokenlist) > 0):
             s, type = self.tokenlist.pop(0)
-            print s, type
             if type == TokenTypes.RESERVED:
                 self.currtoken = (s, "", 0)
-            elif type == TokenTypes.INT:
+            elif type == TokenTypes.DIGIT:
                 self.currtoken = ("digit", "", int(s))
-            elif type == TokenTypes.ID:
+            elif type == TokenTypes.LABEL:
                 self.symboltable[s] = 0
                 self.currtoken = ("label", s, 0)
             else:
@@ -36,11 +38,11 @@ class Parser():
     
     def consume(self, expected):
         if self.currtoken[0] == expected:
-            self.nextToken()
+            self._nextToken()
         else:
-            print "expected " + expected + " not found" 
+            print "Expected " + expected + " not found" 
     
-    def doStatementList(self):
+    def _doStatementList(self):
         stmts = []
         newstmt = []
         
@@ -49,66 +51,66 @@ class Parser():
                 # ["while", [condition], [statementlist]]
                 self.consume("while")
                 newstmt = ["while"]
-                newstmt.append(self.doCondition())
-                newstmt.append(self.doStatementList())
+                newstmt.append(self._doCondition())
+                newstmt.append(self._doStatementList())
                 self.consume("endwhile")
             elif self.currtoken[0] == "if":
                 # ["if", [condition], [then part], [else part]]
                 self.consume("if")
                 newstmt = ["if"]
-                newstmt.append(self.doCondition())
-                newstmt.append(self.doStatementList())
+                newstmt.append(self._doCondition())
+                newstmt.append(self._doStatementList())
                 if self.currtoken[0] == "else":
                     self.consume("else")
-                    newstmt.append(self.doStatementList())
+                    newstmt.append(self._doStatementList())
                 self.consume("endif")
             elif self.currtoken[0] == "print":
                 # ["print", [expression]]
                 self.consume("print")
                 newstmt = ["print"]
-                newstmt.append(self.doExpression())
+                newstmt.append(self._doExpression())
             elif self.currtoken[0] == "label":
-                # ["=", [expression], [expression]]
+                # [":=", [expression], [expression]]
                 label = [self.currtoken[1]]
-                self.nextToken()
+                self._nextToken()
                 self.consume(":=")
                 newstmt = [":="]
                 newstmt.append(label)
-                newstmt.append(self.doExpression())
+                newstmt.append(self._doExpression())
             else:
-                print "invalid statement: " + self.currtoken[0]
+                print "Invalid statement: " + self.currtoken[0]
             stmts.append(newstmt)
         return stmts
     
-    def doCondition(self):
-        exp = self.doExpression()
-        # ["==|!=", [left side], [right side]]
+    def _doCondition(self):
+        exp = self._doExpression()
+        # ["==|!=|<|<=|>|>=", [left side], [right side]]
         if self.currtoken[0] in ["==", "!=", "<", "<=", ">", ">="]:
             retval = [self.currtoken[0]]
             retval.append(exp)
-            self.nextToken()
-            retval.append(self.doExpression())
+            self._nextToken()
+            retval.append(self._doExpression())
         else:
-            print "expected == or != not found"
+            print "Expected ==, !=, <, <=, > or >= not found"
         return retval
         
-    def doExpression(self):
-        term = self.doTerm()
-        # carry the term in case there's no +|-
+    def _doExpression(self):
+        term = self._doTerm()
+        # carry the term in case there's no +|-|*|/
         exp = term
-        # ["+|-", [left side], [right side]]
+        # ["+|-|*|/", [left side], [right side]]
         while self.currtoken[0] in ["+", "-", "*", "/"]:
             exp = [self.currtoken[0]]
-            self.nextToken()
+            self._nextToken()
             exp.append(term)
-            exp.append(self.doExpression())
+            exp.append(self._doExpression())
         return exp
     
-    def doTerm(self):
+    def _doTerm(self):
         if self.currtoken[0] == "label":
             retval = self.currtoken[1]
-            self.nextToken()
+            self._nextToken()
         elif self.currtoken[0] == "digit":
             retval = self.currtoken[2]
-            self.nextToken()
+            self._nextToken()
         return [retval]

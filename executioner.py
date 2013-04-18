@@ -27,43 +27,41 @@ class Executioner():
             self.symboltable[stmt[1][0]] = self.stack.pop()
         elif stmt[0] == "print":
             self._execExpression(stmt[1])
-            print "output:" + str(self.stack.pop())
+            print "Output:" + str(self.stack.pop())
         else:
-            print "invalid statement"
+            print "Invalid statement!"
             exit()
         
     def _execCondition(self, cond):
         self._execExpression(cond[1])
         self._execExpression(cond[2])
         if cond[0] == "==":
-            self.stack.append(self.stack.pop() == self.stack.pop())
+            self.stack.append(self.stack.pop(0) == self.stack.pop(0))
         elif cond[0] == "!=":
-            self.stack.append(self.stack.pop() != self.stack.pop())
+            self.stack.append(self.stack.pop(0) != self.stack.pop(0))
         elif cond[0] == "<":
-            num1 = self.stack.pop()
-            num2 = self.stack.pop()
-            self.stack.append(num1 > num2)
+            self.stack.append(self.stack.pop(0) < self.stack.pop(0))
         elif cond[0] == "<=":
-            self.stack.append(self.stack.pop() >= self.stack.pop())
+            self.stack.append(self.stack.pop(0) <= self.stack.pop(0))
         elif cond[0] == ">":
-            self.stack.append(self.stack.pop() < self.stack.pop())
+            self.stack.append(self.stack.pop(0) > self.stack.pop(0))
         elif cond[0] == ">=":
-            self.stack.append(self.stack.pop() <= self.stack.pop())
+            self.stack.append(self.stack.pop(0) >= self.stack.pop(0))
     
     def _execExpression(self, exp):
         if len(exp) == 3:
             self._execExpression(exp[1])
             self._execExpression(exp[2])
             if exp[0] == "+":
-                self.stack.append(self.stack.pop() + self.stack.pop())
+                self.stack.append(self.stack.pop(0) + self.stack.pop(0))
             elif exp[0] == "-":
-                self.stack.append(self.stack.pop() - self.stack.pop())
+                self.stack.append(self.stack.pop(0) - self.stack.pop(0))
             elif exp[0] == "*":
-                self.stack.append(self.stack.pop() * self.stack.pop())
+                self.stack.append(self.stack.pop(0) * self.stack.pop(0))
             elif exp[0] == "/":
-                self.stack.append(self.stack.pop() / self.stack.pop())
+                self.stack.append(self.stack.pop(0) / self.stack.pop(0))
             else:
-                print "invalid operator %s!" % exp[0] 
+                print "Invalid operator %s!" % exp[0] 
                 exit(1)
         else:
             if type(exp[0]) is int:
