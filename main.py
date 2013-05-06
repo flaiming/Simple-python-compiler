@@ -22,17 +22,28 @@ def main():
     
     #do lexical analysis
     tokenlist = doLex(inputstring)
-    print tokenlist
+    for tlist in tokenlist:
+        for name, type in tlist:
+            print "(%s, %s)" % (name, type)
+    print 
     
     #parse
     parser = Parser()
     stmt = parser.parseTokens(tokenlist)
-    print stmt
+    for s in stmt:
+        print s
+    print
+    
     print parser.getSymbolTable()
+    print
     
     #execute
-    executioner = Executioner(parser.getSymbolTable())
-    executioner.execStatementList(stmt)
+    try:
+        executioner = Executioner(parser.getSymbolTable())
+        executioner.execStatementList(stmt)
+    except Exception as e:
+        print "Error at execution!"
+        print e
 
 if __name__ == "__main__":
     main()

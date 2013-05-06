@@ -1,5 +1,6 @@
-a:=5
-a:=a*5
+a := 5
+a := a*5
+print a
 if a > 4
 	print a
 	a := a / 5
@@ -15,7 +16,10 @@ else
 endif
 print a
 
+
+
 while a < 10
-a := a + 1
+	a := a + 1
 endwhile
+
 print a

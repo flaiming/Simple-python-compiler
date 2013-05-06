@@ -10,8 +10,10 @@ class Parser():
     
     def __init__(self):
         self.tokenlist = []
+        self.tokenline = []
         self.currtoken = ("", "", 0)
         self.symboltable = dict()
+        self.line_num = 0
     
     def parseTokens(self, tokenList):
         self.tokenlist = tokenList
@@ -22,8 +24,13 @@ class Parser():
         return self.symboltable
     
     def _nextToken(self):
-        if(len(self.tokenlist) > 0):
-            s, type = self.tokenlist.pop(0)
+        
+        if not self.tokenline:
+            self.tokenline = self.tokenlist.pop(0)
+            self.line_num += 1
+        
+        if(len(self.tokenline) > 0):
+            s, type = self.tokenline.pop(0)
             if type == TokenTypes.RESERVED:
                 self.currtoken = (s, "", 0)
             elif type == TokenTypes.DIGIT:
@@ -32,7 +39,7 @@ class Parser():
                 self.symboltable[s] = 0
                 self.currtoken = ("label", s, 0)
             else:
-                print "syntax error: " + s
+                print "syntax error: %s at line %d" % (s, self.line_num) 
         else:
             self.currtoken = ("", "", 0)
     
@@ -40,7 +47,8 @@ class Parser():
         if self.currtoken[0] == expected:
             self._nextToken()
         else:
-            print "Expected " + expected + " not found" 
+            print "Expected " + expected + " not found on line " + str(self.line_num) 
+            exit(1)
     
     def _doStatementList(self):
         stmts = []
@@ -78,7 +86,7 @@ class Parser():
                 newstmt.append(label)
                 newstmt.append(self._doExpression())
             else:
-                print "Invalid statement: " + self.currtoken[0]
+                print "Invalid statement: " + self.currtoken[0] + " on line " + str(self.line_num)
             stmts.append(newstmt)
         return stmts
     
@@ -113,4 +121,7 @@ class Parser():
         elif self.currtoken[0] == "digit":
             retval = self.currtoken[2]
             self._nextToken()
+        else:
+            print "Wrong term '%s' at line %d" % (self.currtoken[0], self.line_num)
+            exit(1)
         return [retval]
